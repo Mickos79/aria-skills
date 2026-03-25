@@ -36,7 +36,7 @@ async function gemini(prompt, systemPrompt) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-001',
+      model: 'google/gemini-2.5-pro-preview-03-25',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: prompt }
@@ -50,26 +50,35 @@ async function gemini(prompt, systemPrompt) {
 }
 
 // ─── Classify input ────────────────────────────────────────────────────────
-const CLASSIFY_PROMPT = `You are a classifier for a personal AI OS. 
-Given a user message, determine:
+const CLASSIFY_PROMPT = `You are the Architect Agent for ARIA — a personal AI OS built by Mikhail Kostenko.
+Your job: analyze user input deeply and determine the optimal structure for capturing and evolving this information.
+
+Context: Mikhail runs two projects — ARIA (AI OS, commercializing) and Zakat (fintech automation).
+He thinks in systems: ideas grow into research, research becomes projects, projects have code.
+
+Given a user message, return JSON with:
 1. type: one of [note, idea, task, project, meeting, research]
-2. promote: should an existing idea/note be promoted? (true/false)
-3. needs_infra: does this need folder/file infrastructure? (true/false — only true for project/research with code)
-4. title: short title (5 words max)
-5. tags: array of relevant tags (max 5)
-6. project_type: if project, one of [code, business, research, personal, other]
+2. promote: should an existing draft item be promoted to next stage? (true/false)
+3. needs_infra: create folder/file structure? (true only for project with code OR complex research)
+4. title: clear, specific title (max 8 words, in the language of input)
+5. tags: relevant tags max 5 (project names, domains, tech stack if code)
+6. project_type: if project → one of [code, business, research, personal, other]
 7. urgency: low/medium/high
+8. next_action: brief string — what should happen next with this item (e.g. "start research", "create folder structure", "set reminder", "just log it")
+9. complexity: simple/medium/complex
 
-Rules:
-- note: quick thought, no action needed
-- idea: has potential, may grow
-- task: concrete action, possibly with deadline
-- meeting: scheduled interaction
-- research: investigation needed
-- project: complex, multi-step, code or business
+Lifecycle rules:
+- note: fleeting thought, no follow-up needed → just log
+- idea: has potential worth exploring → log + maybe research
+- task: concrete action with clear outcome → log + optional deadline
+- meeting: scheduled interaction → log + reminder
+- research: active investigation → log + folder if complex
+- project: multi-step initiative with deliverables → log + full infra if code
 
-Respond ONLY with valid JSON. No markdown, no explanation.
-Example: {"type":"idea","promote":false,"needs_infra":false,"title":"Mobile app for reminders","tags":["mobile","product"],"project_type":null,"urgency":"low"}`;
+Promote to project when: idea has been researched AND work has started AND it's multi-step.
+
+Respond ONLY with valid JSON. No markdown fences, no explanation.
+Example: {"type":"project","promote":false,"needs_infra":true,"title":"Zakat mobile task tracker","tags":["zakat","mobile","code"],"project_type":"code","urgency":"medium","next_action":"create folder structure and README","complexity":"complex"}`;
 
 async function classify(text) {
   const raw = await gemini(text, CLASSIFY_PROMPT);
