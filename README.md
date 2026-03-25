@@ -1,42 +1,124 @@
 # ARIA Skills
 
-Open-source AI assistant skills built from production experience with [OpenClaw](https://github.com/openclaw/openclaw).
+> Production AI agent skills extracted from a real personal AI OS.
+> Built on [OpenClaw](https://github.com/openclaw/openclaw) + Anthropic Claude + PostgreSQL.
 
-These skills were extracted from a real personal AI OS (ARIA) running on Hetzner + Claude + PostgreSQL.
+**Stack:** Hetzner VPS · Claude Sonnet/Haiku · PostgreSQL + pgvector · n8n · Telegram
+
+---
 
 ## Skills
 
+### 🏗️ architect-agent
+**Gemini 2.5 Pro · PostgreSQL**
+
+Classifies any user input (idea, note, task, project, meeting, research) and automatically creates the right infrastructure. Projects get full folder structure: CONTEXT.md, TASKS.md, DECISIONS.md, RESEARCH.md, MEMORY.md, backups. Lifecycle: `note → idea → research → project`.
+
+[→ View skill](./architect-agent/SKILL.md)
+
+---
+
 ### 🧠 memory-skill
-Teaches your AI to use RAG memory correctly — recall by date, query expansion, honest responses when memory is missing.
+**RAG · pgvector · Layered memory**
+
+Teaches your AI to use RAG memory correctly — semantic search, recall by date, honest responses when memory is missing. Hot (7d) → daily summaries → monthly summaries.
+
+[→ View skill](./memory-skill/SKILL.md)
+
+---
 
 ### 🛡️ sentinel-skill
-Safe command confirmation — blocks destructive operations until user explicitly confirms. Timeout after 60s.
+**Safety · Command protection**
+
+Blocks destructive shell commands (rm -rf, git reset --hard, DROP TABLE etc.) until user explicitly confirms. 60s timeout. Works as OpenClaw plugin hook.
+
+[→ View skill](./sentinel-skill/SKILL.md)
+
+---
 
 ### 📦 retention-skill
-Layered memory archival: hot (7d) → daily summaries → monthly summaries. Never loses data, never bloats.
+**PostgreSQL · Cron**
+
+Layered memory archival: hot messages (7d) → daily summaries → monthly summaries. Never loses data, never bloats DB. Runs nightly via cron.
+
+[→ View skill](./retention-skill/SKILL.md)
+
+---
 
 ### 💰 cost-tracker-skill
-Hourly OpenRouter spend monitoring with Telegram alerts when daily threshold exceeded.
+**OpenRouter · Telegram alerts**
 
-### 🔍 research-skill
-Perplexity-first web search with Claude synthesis fallback. Includes fast-path trigger patterns.
+Hourly spend monitoring. Fetches OpenRouter usage, logs to PostgreSQL, sends Telegram alert when daily threshold exceeded ($20 default).
 
-### 🌿 git-workflow-skill
-Safe git branching for multi-agent repos. Cursor writes to `cursor` branch, orchestrator merges to `main`.
+[→ View skill](./cost-tracker-skill/SKILL.md)
 
-## Usage
+---
 
-Each skill is a single `SKILL.md` file. Drop it into your agent's context or OpenClaw skills directory.
+### 🔬 research-skill
+**Perplexity sonar-pro · Claude fallback**
 
-## Philosophy
+Multi-source research agent. Tries Perplexity sonar-pro first, falls back to Claude with web context. Returns structured findings with sources.
 
-Skills should be:
-- **Generic** — no secrets, no hardcoded IDs
-- **Single-file** — one `SKILL.md` per skill
-- **Actionable** — concrete rules, not vague advice
+[→ View skill](./research-skill/SKILL.md)
 
-## License
-MIT
+---
 
-## Related
-- [OpenClaw](https://github.com/openclaw/openclaw) — the runtime these skills were built for
+### 💬 informal-chat
+**Style modifier · Russian folk expressions**
+
+Switches assistant tone from formal to casual/bro/human mode. Includes a curated collection of Russian folk expressions for natural-sounding informal replies. Auto-resets on task requests.
+
+[→ View skill](./informal-chat/SKILL.md)
+
+---
+
+### 🔄 git-workflow-skill
+**Git · Branch protection**
+
+Enforces safe git workflow: feature branches, no force pushes, protected files, commit conventions. Designed for AI coding agents (Cursor, Claude Code).
+
+[→ View skill](./git-workflow-skill/SKILL.md)
+
+---
+
+## Architecture
+
+These skills are designed for the ARIA stack but work with any OpenClaw setup:
+
+```
+User message
+    ↓
+OpenClaw gateway (Telegram / Web / Mobile)
+    ↓
+Plugins: aria-memory · aria-sentinel
+    ↓
+aria-core API (Node.js)
+    ↓
+Skills: architect · research · cost-tracker · retention
+    ↓
+PostgreSQL (pgvector) + OpenRouter API
+```
+
+## Install
+
+Each skill is a folder with a `SKILL.md` describing integration.
+Copy the relevant `.js` files to your `aria-core/` and follow the SKILL.md instructions.
+
+```bash
+# Install via clawhub (coming soon)
+npx clawhub@latest install aria/architect-agent
+```
+
+## About ARIA
+
+ARIA is a personal AI OS built by [Mikhail Kostenko](https://github.com/Mickos79).
+These skills are extracted from production and open-sourced for the community.
+
+- Private repo (full system): [Mickos79/aria](https://github.com/Mickos79/aria)
+- Skills (public): [Mickos79/aria-skills](https://github.com/Mickos79/aria-skills)
+- Platform: [OpenClaw](https://github.com/openclaw/openclaw)
+- Skills hub: [clawhub.ai](https://clawhub.ai)
+
+---
+
+*Built in production. Used daily. PRs welcome.*
