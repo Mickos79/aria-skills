@@ -1,0 +1,9 @@
+{
+  "name": "aria-architect-agent",
+  "version": "1.0.0",
+  "description": "AI Architect Agent — classifies input, manages lifecycle (note→idea→project), creates folder infrastructure",
+  "main": "architect-agent.js",
+  "keywords": ["aria", "agent", "architect", "project-management", "lifecycle"],
+  "author": "Mikhail Kostenko",
+  "license": "MIT"
+}
